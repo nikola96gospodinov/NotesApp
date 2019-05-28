@@ -1,0 +1,75 @@
+'use strict'
+
+const titleElement = document.querySelector('#note-title')
+const bodyElement = document.querySelector('#note-body')
+const removeElement = document.querySelector('#remove-note')
+const dateElement = document.querySelector('#last-edited')
+const backButton = document.querySelector('#edit-back')
+const noteId = location.hash.substring(1)
+let notes = getSavedNotes()
+let note = notes.find((note) => note.id === noteId)
+
+if (!note) {
+    location.assign('/index.html')
+}
+
+titleElement.value = note.title
+bodyElement.value = note.body
+dateElement.textContent = generateLastEdited(note.updatedAt)
+
+backButton.addEventListener('click', (e) => {
+    location.assign('/notes.html')
+})
+
+titleElement.addEventListener('input', (e) => {
+    note.title = e.target.value
+    note.updatedAt = moment().format('L')
+    dateElement.textContent = generateLastEdited(note.updatedAt)
+    saveNotes(notes)
+})
+
+bodyElement.addEventListener('input', (e) => {
+    note.body = e.target.value
+    note.updatedAt = moment().format('L')
+    dateElement.textContent = generateLastEdited(note.updatedAt)
+    saveNotes(notes)
+})
+
+removeElement.addEventListener('click', (e) => {
+    removeNote(note.id)
+    saveNotes(notes)
+    location.assign('/notes.html')
+})
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'notes') {
+        notes = JSON.parse(e.newValue)
+        note = notes.find((note) => note.id === noteId)
+
+        if (!note) {
+            location.assign('/index.html')
+        }
+
+        titleElement.value = note.title
+        bodyElement.value = note.body
+        dateElement.textContent = generateLastEdited(note.updatedAt)
+    }
+})
+
+const info = document.querySelector('.info')
+const infoButton = document.querySelector('#info-note')
+const closeSpan = document.querySelector('.close')
+
+infoButton.addEventListener('click', (e) => {
+    info.style.display = 'block'
+})
+
+closeSpan.addEventListener('click', (e) => {
+    info.style.display = 'none'
+})
+
+window.addEventListener('click', (e) => {
+    if (e.target === info) {
+        info.style.display = 'none'
+    }
+})
